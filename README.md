@@ -21,6 +21,7 @@ jo = "0.13"
 
 [module.tests]
 kind = "app"
+depth = 2
 platform = "python"
 enable-ffi = true
 src = ["tests/"]
@@ -31,9 +32,8 @@ packages = [
 ```
 
 For Ruby, change `platform` to `"ruby"` and the runner dependency to `jtest-ruby`.
-The test source stays the same. Package installation becomes available when
-the registrations are merged into [typescope/packages](https://github.com/typescope/packages)
-and the release has appeared in the public registry.
+The test source stays the same. `depth = 2` allows the runner's dependency on
+the shared core package. All three packages are available in the public registry.
 
 ## Write tests
 

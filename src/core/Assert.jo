@@ -22,5 +22,9 @@ def checkEquals[T](label: String, actual: T, expected: T)(
     auto eq: Eq[T] with [[T].==], show: Show[T] with [[T].toString], source: SourceLocation)
 : Unit receives testResult =
   if !eq.equal(actual, expected) then
-    testResult.record(source, jtest.Testing.NotEqual(
-      label, show.show(actual), show.show(expected)))
+    testResult.record:
+      source
+      jtest.Testing.NotEqual:
+        label
+        show.show(actual)
+        show.show(expected)

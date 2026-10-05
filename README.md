@@ -1,7 +1,6 @@
 # jtest
 
 A testing framework for Jo, with a shared API and Python and Ruby runners.
-Extracted from [Harpe](https://github.com/typescope/harpe); jtest has no Harpe dependency.
 
 | Package | Platform | Provides |
 | --- | --- | --- |
@@ -106,9 +105,3 @@ Both backends run the same conformance tests. The intentional failing test
 scenarios verify reporting and exception recovery; the overall command succeeds
 only when all conformance checks pass. `src/runner/` is shared source compiled into
 each runner package; `src/python/` and `src/ruby/` supply the host operations.
-
-## Migration from Harpe testing
-
-Replace `harpe-testing-python` with `jtest` and `jtest-python`, change imports
-from `harpe.testing` to `jtest`, and rename `HARPE_TEST_WORKERS` to
-`JTEST_WORKERS`. The test declaration and runner APIs are otherwise preserved.

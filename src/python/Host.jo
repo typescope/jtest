@@ -1,0 +1,51 @@
+namespace jtest
+
+private class HostLock
+  private val lock = py.module("threading").Lock()
+  def acquire(): Unit =
+    lock.acquire()
+    pass
+  def release(): Unit =
+    lock.release()
+    pass
+end
+
+private class HostThread(body: () => Unit)
+  private val thread = py.module("threading").Thread(target = body, daemon = true)
+  def start(): Unit =
+    thread.start()
+    pass
+  def join(): Unit =
+    thread.join()
+    pass
+end
+
+private def hostEnv(name: String, fallback: String): String =
+  py.module("os").getenv(name, fallback).asString
+
+private def hostInt(value: String): Int = py.module("builtins").int(value).asInt
+
+private def hostHasEnv(name: String): Bool =
+  py.module("os").environ.__contains__(name).asBool
+
+private def hostCores(): Int =
+  val os = py.module("os")
+  val count = match py.try(os.process_cpu_count())
+    case Ok(value) => value
+    case Err(_) => os.cpu_count()
+  if py.isNone(count) then 1 else count.asInt
+
+private def hostTime(): Float = py.module("time").monotonic().asFloat
+private def hostRound(value: Float): Float = py.module("builtins").round(value, 2).asFloat
+private def hostTerminal(): Bool = py.module("sys").stdout.isatty().asBool
+private def hostWrite(value: String): Unit =
+  py.module("sys").stdout.write(value)
+  pass
+private def hostFlush(): Unit =
+  py.module("sys").stdout.flush()
+  pass
+
+private def hostTry(body: () => Unit): Result[Bool, String] =
+  match py.try(body())
+  case Ok(_) => Ok(true)
+  case Err(error) => Err(error.message)

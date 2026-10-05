@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install Jo 0.13.11
+        run: |
+          curl -fsSLO https://github.com/typescope/jo/releases/download/v0.13.11/jo-0.13.11.tar.gz
+          curl -fsSLO https://github.com/typescope/jo/releases/download/v0.13.11/jo-0.13.11.tar.gz.sha256
+          sha256sum --check jo-0.13.11.tar.gz.sha256
+          tar -xzf jo-0.13.11.tar.gz -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/jo-0.13.11/bin" >> "$GITHUB_PATH"
+      - run: jo run test-python
+      - run: jo run test-ruby
+      - run: python3 scripts/check-output.py
+      - name: Build release artifacts
+        run: |
+          jo package core
+          jo package python
+          jo package ruby

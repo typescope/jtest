@@ -1,0 +1,15 @@
+namespace jtest
+
+private section Style
+  private def enabled(): Bool =
+    hostTerminal() && hostEnv("TERM", "") != "dumb" && !hostHasEnv("NO_COLOR")
+
+  private def paint(code: String, text: String): String =
+    if enabled() then "\u{1b}[" + code + "m" + text + "\u{1b}[0m"
+    else text
+
+  def success(text: String): String = paint("38;5;114", text)
+  def error(text: String): String = paint("1;38;5;203", text)
+  def muted(text: String): String = paint("38;5;245", text)
+  def strong(text: String): String = paint("1", text)
+end

@@ -1,0 +1,50 @@
+jo = "0.13"
+
+[module.core]
+kind = "lib"
+platform = "pure"
+src = ["src/core/"]
+compile-options = ["--test-pickling", "--check-tree"]
+doc-options = ["--title", "jtest"]
+
+[module.core.package]
+name = "jtest"
+version = "0.1.0"
+
+[module.python]
+kind = "lib"
+platform = "python"
+enable-ffi = true
+src = ["src/runner/", "src/python/"]
+modules = ["core"]
+compile-options = ["--test-pickling", "--check-tree"]
+
+[module.python.package]
+name = "jtest-python"
+version = "0.1.0"
+
+[module.ruby]
+kind = "lib"
+platform = "ruby"
+enable-ffi = true
+src = ["src/runner/", "src/ruby/"]
+modules = ["core"]
+compile-options = ["--test-pickling", "--check-tree"]
+
+[module.ruby.package]
+name = "jtest-ruby"
+version = "0.1.0"
+
+[module.test-python]
+kind = "app"
+platform = "python"
+enable-ffi = true
+modules = ["core", "python"]
+src = ["tests/"]
+
+[module.test-ruby]
+kind = "app"
+platform = "ruby"
+enable-ffi = true
+modules = ["core", "ruby"]
+src = ["tests/"]

@@ -1,0 +1,48 @@
+namespace jtest
+
+private class HostLock
+  private val lock = rb.const("Mutex").init()
+  def acquire(): Unit =
+    lock.lock()
+    pass
+  def release(): Unit =
+    lock.unlock()
+    pass
+end
+
+private class HostThread(body: () => Unit)
+  // Ruby's Thread.new requires a block; Jo's FFI passes functions as Proc values.
+  private val thread = rb.const("Kernel").eval("->(body) { Thread.new { body.call } }").call(body)
+  def start(): Unit = pass
+  def join(): Unit =
+    thread.join()
+    pass
+end
+
+private def hostEnv(name: String, fallback: String): String =
+  rb.const("ENV").fetch(name, fallback).asString
+
+private def hostInt(value: String): Int = rb.const("Kernel").callDynamic("Integer", value).asInt
+
+private def hostHasEnv(name: String): Bool = rb.const("ENV").callDynamic("key?", name).asBool
+
+private def hostCores(): Int =
+  rb.require("etc")
+  rb.const("Etc").nprocessors().asInt
+
+private def hostTime(): Float =
+  rb.const("Process").clock_gettime(rb.const("Process::CLOCK_MONOTONIC")).asFloat
+
+private def hostRound(value: Float): Float = rb.dynamic(value).round(2).asFloat
+private def hostTerminal(): Bool = rb.const("STDOUT").callDynamic("tty?").asBool
+private def hostWrite(value: String): Unit =
+  rb.const("STDOUT").write(value)
+  pass
+private def hostFlush(): Unit =
+  rb.const("STDOUT").flush()
+  pass
+
+private def hostTry(body: () => Unit): Result[Bool, String] =
+  match rb.try(body())
+  case Ok(_) => Ok(true)
+  case Err(error) => Err(error.message)

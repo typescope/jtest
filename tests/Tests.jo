@@ -1,0 +1,102 @@
+import jo.IO.stdout
+import jtest.Testing
+import jtest.Runner
+import jtest.check
+import jtest.checkEquals
+import jtest.suite
+import jtest.test
+import jtest.thisSuite
+import jtest.testResult
+
+private class State
+  var prepared: Int = 0
+  var ran: Int = 0
+  var order: String = ""
+end
+
+def main(): Unit receives stdout =
+  assertions()
+  for lanes in [-1, 0, 1, 4] do
+    scheduling(lanes)
+  filtering()
+  failures()
+  println "CONFORMANCE PASSED"
+
+private def assertions(): Unit =
+  val result = new Testing.TestResult
+  with testResult = result in
+    check("pass", true)
+    check("first failure", false)
+    checkEquals("second failure", 1, 2)
+    checkEquals("equal strings", "same", "same")
+  assert: result.failures.size == 2, "assertions must accumulate failures"
+  assert: result.failures.get(0).source.line > 0, "failure must retain source location"
+
+private def scheduling(lanes: Int): Unit receives stdout =
+  val state = new State
+  val root = Testing.define("scheduling", () => schedulingSuite(state))
+  assert: Runner.run(root, "", lanes), "scheduled tests failed"
+  assert: state.prepared == 2, "fixtures must run exactly once"
+  assert: state.ran == 3, "each serial child must run exactly once"
+  assert: state.order == "abc", "serial subtree order changed"
+
+private def schedulingSuite(state: State): Unit receives thisSuite =
+  thisSuite.beforeSuite = () => state.prepared = state.prepared + 1
+  suite: "parallel", () =>
+    thisSuite.parallel = true
+    thisSuite.beforeSuite = () => state.prepared = state.prepared + 1
+    test: "one", () => checkEquals("fixtures ran", state.prepared, 2)
+    test: "two", () => check("second closure", true)
+    suite: "nested parallel", () =>
+      thisSuite.parallel = true
+      test: "three", () => check("third closure", true)
+      test: "four", () => check("fourth closure", true)
+    suite: "serial", () =>
+      test: "a", () => record(state, "a")
+      test: "b", () => record(state, "b")
+      suite: "inner parallel", () =>
+        thisSuite.parallel = true
+        test: "inner one", () => checkEquals("serial prerequisites", state.order, "ab")
+        test: "inner two", () => checkEquals("serial prerequisites", state.ran, 2)
+      test: "c", () => record(state, "c")
+
+private def record(state: State, label: String): Unit =
+  state.ran = state.ran + 1
+  state.order = state.order + label
+
+private def filtering(): Unit receives stdout =
+  val selected = new State
+  val skipped = new State
+  val root = Testing.define("filtering", () => filterSuites(selected, skipped))
+  assert: Runner.run(root, "selected/one", 2), "filtered run failed"
+  assert: selected.prepared == 1 && selected.ran == 1, "selected fixture or body count wrong"
+  assert: skipped.prepared == 0 && skipped.ran == 0, "unselected suite ran"
+  assert: Runner.run(root, "missing", 2), "empty selection should succeed"
+  assert: selected.prepared == 1, "empty selection prepared a fixture"
+
+private def filterSuites(selected: State, skipped: State): Unit receives thisSuite =
+  suite: "selected", () =>
+    thisSuite.parallel = true
+    thisSuite.beforeSuite = () => selected.prepared = selected.prepared + 1
+    test: "one", () => record(selected, "one")
+    test: "two", () => record(selected, "two")
+  suite: "skipped", () =>
+    thisSuite.beforeSuite = () => skipped.prepared = skipped.prepared + 1
+    test: "one", () => record(skipped, "one")
+
+private def failures(): Unit receives stdout =
+  val state = new State
+  val root = Testing.define("expected failures", () => failureSuite(state))
+  assert: !Runner.run(root, "", 3), "runner must return false for failed tests"
+  assert: state.ran == 1, "runner must continue after unexpected exceptions"
+
+private def failureSuite(state: State): Unit receives thisSuite =
+  suite: "parallel", () =>
+    thisSuite.parallel = true
+    test: "assertions", () =>
+      check("failure alpha", false)
+      checkEquals("failure beta", 1, 2)
+    test: "exception", () =>
+      check("before exception", false)
+      abort: "expected exception"
+    test: "continues", () => record(state, "continued")

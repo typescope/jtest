@@ -26,7 +26,6 @@ platform = "python"
 enable-ffi = true
 src = ["tests/"]
 packages = [
-  { name = "jtest", version = "0.1" },
   { name = "jtest-python", version = "0.1" },
 ]
 ```

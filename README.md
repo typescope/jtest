@@ -39,18 +39,13 @@ the shared core package. All three packages are available in the public registry
 ```jo
 import jo.IO.stdout
 import jo.IO.args
-import jtest.Testing
-import jtest.Runner
-import jtest.suite
-import jtest.test
-import jtest.checkEquals
-import jtest.thisSuite
+import jtest.*
 
 def main(): Unit receives stdout, args =
   val root = Testing.define("my tests", () => suites())
   assert: Runner.runWithArgs(root), "tests failed"
 
-private def suites(): Unit receives thisSuite =
+private def suites(): Unit =
   suite: "math", () =>
     test: "adds numbers", () =>
       checkEquals("one plus one", 1 + 1, 2)

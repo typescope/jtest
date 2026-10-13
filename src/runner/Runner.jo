@@ -158,9 +158,14 @@ section Runner
     report(tally, hostTime() - started)
     tally.failures.isEmpty
 
-  //[ Convenience entry point for the conventional first-argument filter. //]
-  def runWithArgs(root: Testing.Suite): Bool receives stdout, args =
-    run(root, filterFromArgs(args))
+  //[ Run tests using the conventional first-argument filter.
+    !
+    ! Aborts with a non-zero process status when any selected test fails. Use
+    ! `run` when the caller needs to handle the Boolean result itself.
+  //]
+  def runWithArgs(root: Testing.Suite): Unit receives stdout, args =
+    if !run(root, filterFromArgs(args)) then
+      abort("tests failed")
 
   // The root contributes no path segment, so a filter reads as `providers/openai`.
   private def walk(

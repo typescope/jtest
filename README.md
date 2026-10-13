@@ -17,7 +17,7 @@ Jo's implicitly imported `jo` namespace.
 In your project's `jo.toml`:
 
 ```toml
-jo = "0.13"
+jo = "0.14"
 
 [module.tests]
 kind = "app"
@@ -26,7 +26,7 @@ platform = "python"
 enable-ffi = true
 src = ["tests/"]
 packages = [
-  { name = "jtest-python", version = "0.1" },
+  { name = "jtest-python", version = "0.2" },
 ]
 ```
 
@@ -43,7 +43,7 @@ import jtest.*
 
 def main(): Unit receives stdout, args =
   val root = Testing.define("my tests", () => suites())
-  assert: Runner.runWithArgs(root), "tests failed"
+  Runner.runWithArgs(root)
 
 private def suites(): Unit =
   suite: "math", () =>
@@ -58,8 +58,9 @@ jo run tests -- "math/adds numbers"
 ```
 
 Assertions accumulate failures and retain their source locations. Unexpected
-exceptions fail the current test, and execution continues. The runner returns
-`false` on failure; the example assertion makes the application exit unsuccessfully.
+exceptions fail the current test, and execution continues. `Runner.runWithArgs`
+exits with a non-zero status if any selected test fails. Use `Runner.run` when
+you want to handle its Boolean result yourself.
 
 Filters are test-path prefixes. The root's name is not part of a path. A filter
 that matches no tests succeeds and skips all suite fixtures.
@@ -84,7 +85,7 @@ values use the default, and zero selects one worker.
 
 ## Development
 
-Use Jo 0.13.11, Python 3.12+, Ruby 3.3+, and JDK 17+.
+Use Jo 0.14.0, Python 3.12+, Ruby 3.3+, and JDK 17+.
 
 ```sh
 jo run test-python

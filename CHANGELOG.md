@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- `Runner.runWithArgs` uses normal process exit with status 1 after reporting
+  failed tests on Python and Ruby, removing the extra runner exception
+  traceback. ([#2](https://github.com/typescope/jtest/issues/2))
+
 ## [0.2.0] - 2026-10-13
 
 ### Breaking changes

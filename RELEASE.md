@@ -36,7 +36,7 @@ is shared with Ruby and appears only once.
 Set `VERSION` to the package version in `jo.toml`:
 
 ```sh
-VERSION=0.2.0
+VERSION=0.2.1
 API_DIR="/tmp/jtest-api-v$VERSION"
 jo compile --doc --use-runtime-api python --title jtest --project-version "$VERSION" \
   --readme README.md --out "$API_DIR" \
@@ -89,7 +89,7 @@ the site; the deployment runs after merge.
 
 The site root redirects to the latest listed version. Documentation URLs are:
 
-- `https://jtest.jo-lang.org/` → `https://jtest.jo-lang.org/0.2.0/`
+- `https://jtest.jo-lang.org/` → `https://jtest.jo-lang.org/0.2.1/`
 - `https://jtest.jo-lang.org/<version>/`
 
 The redirect preserves query strings and API symbol links. Previous version

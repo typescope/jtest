@@ -9,7 +9,7 @@ doc-options = ["--title", "jtest"]
 
 [module.core.package]
 name = "jtest"
-version = "0.2.0"
+version = "0.2.1"
 
 [module.python]
 kind = "lib"
@@ -21,7 +21,7 @@ compile-options = ["--test-pickling", "--check-tree"]
 
 [module.python.package]
 name = "jtest-python"
-version = "0.2.0"
+version = "0.2.1"
 
 [module.ruby]
 kind = "lib"
@@ -33,7 +33,7 @@ compile-options = ["--test-pickling", "--check-tree"]
 
 [module.ruby.package]
 name = "jtest-ruby"
-version = "0.2.0"
+version = "0.2.1"
 
 [module.test-python]
 kind = "app"

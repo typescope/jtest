@@ -13,7 +13,6 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 
-PACKAGES = {"jtest": "Pure Jo", "jtest-python": "Python", "jtest-ruby": "Ruby"}
 ASSET_BASE = "https://github.com/typescope/jtest/releases/download"
 
 
@@ -22,8 +21,8 @@ def read_url(url):
         return response.read()
 
 
-def unpack_docs(archive, destination, package, version):
-    prefix = PurePosixPath(package, version)
+def unpack_docs(archive, destination, version):
+    prefix = PurePosixPath(version)
     with zipfile.ZipFile(io.BytesIO(archive)) as zipped:
         for member in zipped.namelist():
             path = PurePosixPath(member)
@@ -31,7 +30,7 @@ def unpack_docs(archive, destination, package, version):
                 raise ValueError(f"unexpected API archive path: {member}")
         for name in ("index.html", "data.js"):
             if f"{prefix}/{name}" not in zipped.namelist():
-                raise ValueError(f"{package} {version}: API archive is missing {name}")
+                raise ValueError(f"{version}: API archive is missing {name}")
         zipped.extractall(destination)
 
 
@@ -51,39 +50,33 @@ def prepare_site(root, asset_base=ASSET_BASE):
     # Build in a temporary directory so a failed download cannot publish partial docs.
     with tempfile.TemporaryDirectory() as temporary:
         staging = Path(temporary)
-        libraries = []
-        for package, platform in PACKAGES.items():
-            for version in versions:
-                name = f"{package}-api-docs-v{version}.zip"
-                url = f"{asset_base.rstrip('/')}/v{version}/{name}"
-                archive = read_url(url)
-                checksum = read_url(url + ".sha512").decode().split()
-                if not checksum or hashlib.sha512(archive).hexdigest() != checksum[0]:
-                    raise ValueError(f"checksum mismatch: {url}")
-                unpack_docs(archive, staging, package, version)
-                print(f"{package} {version}: /api/{package}/{version}/")
+        for version in versions:
+            name = f"jtest-docs-v{version}.zip"
+            url = f"{asset_base.rstrip('/')}/v{version}/{name}"
+            archive = read_url(url)
+            checksum = read_url(url + ".sha512").decode().split()
+            if not checksum or hashlib.sha512(archive).hexdigest() != checksum[0]:
+                raise ValueError(f"checksum mismatch: {url}")
+            unpack_docs(archive, staging, version)
+            print(f"jtest {version}: /api/{version}/")
 
-            target = f"../{latest}/"
-            alias = staging / package / "latest"
-            alias.mkdir()
-            (alias / "index.html").write_text(
-                '<!doctype html><html lang="en"><meta charset="utf-8">'
-                f'<title>{package} API</title>'
-                f'<meta http-equiv="refresh" content="0;url={target}">'
-                f'<script>location.replace("{target}" + location.search + location.hash)</script>'
-                f'<a href="{target}">Read {package} {latest} API documentation</a></html>\n'
-            )
-            libraries.append({
-                "name": package, "platform": platform, "version": latest,
-                "path": f"api/{package}/latest/",
-            })
+        target = f"../{latest}/"
+        alias = staging / "latest"
+        alias.mkdir()
+        (alias / "index.html").write_text(
+            '<!doctype html><html lang="en"><meta charset="utf-8">'
+            '<title>jtest API</title>'
+            f'<meta http-equiv="refresh" content="0;url={target}">'
+            f'<script>location.replace("{target}" + location.search + location.hash)</script>'
+            f'<a href="{target}">Read jtest {latest} API documentation</a></html>\n'
+        )
 
         destination = docs / "static" / "api"
         if destination.exists():
             shutil.rmtree(destination)
         shutil.copytree(staging, destination)
 
-    (docs / "api-docs.json").write_text(json.dumps({"libraries": libraries}, indent=2) + "\n")
+    (docs / "api-docs.json").write_text(json.dumps({"version": latest, "path": "api/latest/"}) + "\n")
     # Nest the changelog headings below the page's single h1.
     changelog = re.sub(r"(?m)^(#{1,5}) ", r"#\1 ", (root / "CHANGELOG.md").read_text())
     (docs / "changelog.md").write_text(changelog)

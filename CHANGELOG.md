@@ -4,8 +4,8 @@
 
 ### Added
 
-- A GitHub Pages site with the changelog and latest API documentation for all
-  three packages. Earlier API versions remain available at versioned URLs.
+- A GitHub Pages site with the changelog and unified API documentation for
+  assertions, suites, and both runners. Earlier versions remain at versioned URLs.
 - Release API documentation archives with the README as their introduction.
 
 ### Fixed

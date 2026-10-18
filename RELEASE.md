@@ -13,8 +13,8 @@ in `typescope/jtest`. Their registrations in `typescope/packages` use namespace
    dependencies; each runner must depend only on the matching core version.
 5. Verify every `.sha512` file from its `.build/<module>/release/` directory.
 6. Commit the reviewed sources, wait for green CI, tag that commit `vVERSION`,
-   and publish the `.joy`, source ZIP, API documentation ZIP, and their checksums
-   for every package.
+   and publish each package's `.joy`, source ZIP, and checksums, plus the unified
+   API documentation ZIP and its checksum.
 7. Once registrations are merged, trigger `sync-releases.yml` in
    `typescope/packages` and verify all three versions at `pkg.jo-lang.org`.
 
@@ -24,59 +24,60 @@ until all three versions are available from the public registry.
 
 ## API documentation assets
 
-Generate documentation from the same clean, merged release commit as the
-packages, using the CI compiler. All three modules use `README.md` as the API
-documentation home page. Set `VERSION` to the package version in `jo.toml`:
+Generate one API site from the same clean, merged release commit as the
+packages, using the CI compiler. Compile the core and shared runner sources
+together, with `README.md` as the home page. Python host helpers supply the
+private implementation names needed for type checking; the public runner API
+is shared with Ruby and appears only once.
+
+Set `VERSION` to the package version in `jo.toml`:
 
 ```sh
 VERSION=0.2.0
-jo doc core
-jo doc python
-jo doc ruby
-python3 scripts/package-api-docs.py "$VERSION" --output "/tmp/jtest-api-release/v$VERSION"
+API_DIR="/tmp/jtest-api-v$VERSION"
+jo compile --doc --use-runtime-api python --title jtest --project-version "$VERSION" \
+  --readme README.md --out "$API_DIR" \
+  src/core/*.jo src/runner/*.jo src/python/*.jo
+python3 scripts/package-api-docs.py "$VERSION" --source "$API_DIR" \
+  --output "/tmp/jtest-docs-release/v$VERSION"
 ```
 
-The script checks that the generated version and README match the checkout.
-It produces these archives and a `.sha512` file for each:
-
-- `jtest-api-docs-vVERSION.zip`
-- `jtest-python-api-docs-vVERSION.zip`
-- `jtest-ruby-api-docs-vVERSION.zip`
-
-Each archive contains `<package>/<version>/index.html`, `data.js`, and assets.
-Verify the checksums from the output directory:
+The script checks the version, README, and presence of both the core and runner
+API. It produces `jtest-docs-vVERSION.zip` and its `.sha512` file. The archive
+contains `<version>/index.html`, `data.js`, and assets. Verify the checksum from
+the output directory:
 
 ```sh
-(cd "/tmp/jtest-api-release/v$VERSION" && sha512sum --check *.sha512)
+(cd "/tmp/jtest-docs-release/v$VERSION" && sha512sum --check *.sha512)
 ```
 
-Include all six files when creating the GitHub release alongside the package
+Include both files when creating the GitHub release alongside the package
 assets. If the release already exists, add the new documentation assets with:
 
 ```sh
-gh release upload "v$VERSION" "/tmp/jtest-api-release/v$VERSION/"* \
+gh release upload "v$VERSION" "/tmp/jtest-docs-release/v$VERSION/"* \
   --repo typescope/jtest
 ```
 
 Do not use `--clobber`. To add docs for an older release, check out its published
-tag in a separate directory, use that release's compiler, and add the same
-`--readme README.md` and package `--title` doc options if they are missing.
-Generate and package from those released sources, including their original
-README. Do not generate an older version's API docs from current `main`.
+tag in a separate directory and use that release's compiler. Run the doc
+compiler command from that checkout with its original README, then invoke
+the current `package-api-docs.py` by its absolute path. Do not generate an
+older version's API docs from current `main`.
 
 ## GitHub Pages
 
 After uploading the API assets, append `{"version": "VERSION"}` to
 `docs/api-versions.jsonl` in a PR. Keep all existing entries: the site downloads
 and verifies the archives for every listed version on every build. Only append
-a version once its three API archives and checksums are available in the release.
+a version once its unified API archive and checksum are available in the release.
 
-The site shows only the latest version per package. Documentation URLs are:
+The site links to the latest unified API documentation. Documentation URLs are:
 
-- `https://typescope.github.io/jtest/api/<package>/latest/`
-- `https://typescope.github.io/jtest/api/<package>/<version>/`
+- `https://typescope.github.io/jtest/api/latest/`
+- `https://typescope.github.io/jtest/api/<version>/`
 
-The latest aliases preserve API symbol links, and previous version paths remain
+The latest alias preserves API symbol links, and previous version paths remain
 accessible when a new release is added. The changelog is rendered directly from
 the repository's `CHANGELOG.md`.
 
@@ -95,5 +96,4 @@ python3 scripts/prepare-site.py
 zola --root docs serve
 ```
 
-`prepare-site.py` regenerates ignored site data and the downloaded API tree;
-generated `.build/` documentation is only read when packaging release assets.
+`prepare-site.py` regenerates ignored site data and the downloaded API tree.

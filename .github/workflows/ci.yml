@@ -36,10 +36,11 @@ jobs:
           jo package core
           jo package python
           jo package ruby
-      - name: Build API documentation archives
+      - name: Build unified API documentation archive
         run: |
-          jo doc core
-          jo doc python
-          jo doc ruby
           version=$(python3 -c 'import tomllib; print(tomllib.load(open("jo.toml", "rb"))["module"]["core"]["package"]["version"])')
-          python3 scripts/package-api-docs.py "$version" --output "$RUNNER_TEMP/jtest-api-docs"
+          jo compile --doc --use-runtime-api python --title jtest --project-version "$version" \
+            --readme README.md --out "$RUNNER_TEMP/jtest-api" \
+            src/core/*.jo src/runner/*.jo src/python/*.jo
+          python3 scripts/package-api-docs.py "$version" --source "$RUNNER_TEMP/jtest-api" \
+            --output "$RUNNER_TEMP/jtest-api-docs"

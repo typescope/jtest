@@ -59,7 +59,7 @@ jo run tests -- "math/adds numbers"
 
 Assertions accumulate failures and retain their source locations. Unexpected
 exceptions fail the current test, and execution continues. `Runner.runWithArgs`
-exits with a non-zero status if any selected test fails. Use `Runner.run` when
+exits with status 1 if any selected test fails. Use `Runner.run` when
 you want to handle its Boolean result yourself.
 
 Filters are test-path prefixes. The root's name is not part of a path. A filter

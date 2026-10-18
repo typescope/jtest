@@ -45,6 +45,10 @@ private def hostFlush(): Unit =
   py.module("sys").stdout.flush()
   pass
 
+private def hostExit(status: Int): Unit =
+  py.module("sys").exit(status)
+  pass
+
 private def hostTry(body: () => Unit): Result[Bool, String] =
   match py.try(body())
   case Ok(_) => Ok(true)

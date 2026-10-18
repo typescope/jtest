@@ -42,6 +42,10 @@ private def hostFlush(): Unit =
   rb.const("STDOUT").flush()
   pass
 
+private def hostExit(status: Int): Unit =
+  rb.const("Kernel").exit(status)
+  pass
+
 private def hostTry(body: () => Unit): Result[Bool, String] =
   match rb.try(body())
   case Ok(_) => Ok(true)

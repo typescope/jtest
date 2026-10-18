@@ -4,3 +4,7 @@ jo.lock
 __pycache__/
 *.jo-before.txt
 *.jo-after.txt
+docs/public/
+docs/static/api/
+docs/api-docs.json
+docs/changelog.md

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- A GitHub Pages site with the changelog and latest API documentation for all
+  three packages. Earlier API versions remain available at versioned URLs.
+- Release API documentation archives with the README as their introduction.
+
 ### Fixed
 
 - `Runner.runWithArgs` uses normal process exit with status 1 after reporting

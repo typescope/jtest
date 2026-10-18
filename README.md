@@ -2,6 +2,8 @@
 
 A testing framework for Jo, with a shared API and Python and Ruby runners.
 
+[API documentation and changelog](https://typescope.github.io/jtest/).
+
 | Package | Platform | Provides |
 | --- | --- | --- |
 | `jtest` | pure | Suite declarations, assertions, and assertion results |

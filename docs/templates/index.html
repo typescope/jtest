@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ config.description }}">
+  <title>{{ config.title }} — Testing for Jo</title>
+  <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="wordmark" href="{{ config.base_url }}/">jtest<span aria-hidden="true">.</span></a>
+    <nav aria-label="Main navigation">
+      <a href="#api">API docs</a>
+      <a href="#changelog">Changelog</a>
+      <a href="{{ config.extra.github }}">GitHub ↗</a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="intro" aria-labelledby="title">
+      <p class="eyebrow">Testing for Jo</p>
+      <h1 id="title">jtest</h1>
+      <p class="description">A shared testing API, with Python and Ruby runners.</p>
+      <p class="intro-detail">Declare suites, collect assertion failures, and run independent tests in parallel.</p>
+    </section>
+    <section id="api" aria-labelledby="api-title">
+      <div class="section-heading">
+        <h2 id="api-title">API documentation</h2>
+        <span class="section-note">Latest release</span>
+      </div>
+      <p>Getting started, installation, and API reference for each package.</p>
+      {% set api = load_data(path="api-docs.json") %}
+      <table>
+        <thead><tr><th scope="col">Package</th><th scope="col">Platform</th><th scope="col">Documentation</th></tr></thead>
+        <tbody>
+          {% for library in api.libraries %}
+          <tr>
+            <th scope="row"><code>{{ library.name }}</code></th>
+            <td>{{ library.platform }}</td>
+            <td><a href="{{ get_url(path=library.path, trailing_slash=true) }}" aria-label="{{ library.name }} {{ library.version }} API documentation">v{{ library.version }} <span aria-hidden="true">↗</span></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="version-note">Earlier docs remain at <code>api/&lt;package&gt;/&lt;version&gt;/</code>.</p>
+    </section>
+    <section class="changelog" aria-labelledby="changelog">
+      {% set changelog = load_data(path="changelog.md", format="plain") %}
+      {{ changelog | markdown | safe }}
+    </section>
+  </main>
+  <footer>
+    <p>Built for <a href="https://jo-lang.org">Jo</a>.</p>
+    <div><a href="{{ config.extra.github }}/releases">Releases</a><a href="{{ config.extra.github }}/blob/main/LICENSE">MIT license</a></div>
+  </footer>
+</body>
+</html>

@@ -17,6 +17,9 @@ in `typescope/jtest`. Their registrations in `typescope/packages` use namespace
    API documentation ZIP and its checksum.
 7. Once registrations are merged, trigger `sync-releases.yml` in
    `typescope/packages` and verify all three versions at `pkg.jo-lang.org`.
+8. Publish the API docs website: add the version to `docs/api-versions.jsonl`
+   in a PR, wait for its merge and the Pages deployment, then verify the live
+   root redirect and version URLs as described below.
 
 Never replace published artifacts or move a published tag. Package registration
 is a reviewed PR; leave merges to a maintainer. Do not switch downstream users
@@ -65,12 +68,24 @@ compiler command from that checkout with its original README, then invoke
 the current `package-api-docs.py` by its absolute path. Do not generate an
 older version's API docs from current `main`.
 
-## GitHub Pages
+## Publish the API docs website
 
 After uploading the API assets, append `{"version": "VERSION"}` to
 `docs/api-versions.jsonl` in a PR. Keep all existing entries: the site downloads
 and verifies the archives for every listed version on every build. Only append
 a version once its unified API archive and checksum are available in the release.
+
+After this manifest PR is merged to `main`, the `Docs` workflow downloads all
+listed API archives and publishes them to GitHub Pages. Wait for the deployment
+from that merge commit to succeed:
+
+```sh
+gh run list --repo typescope/jtest --workflow docs.yml --branch main --limit 5
+gh run watch RUN_ID --repo typescope/jtest --exit-status
+```
+
+Use the run ID for the merged manifest commit. A successful PR build validates
+the site; the deployment runs after merge.
 
 The site root redirects to the latest listed version. Documentation URLs are:
 
@@ -87,6 +102,21 @@ checks PRs and deploys site changes merged to `main`. To republish manually:
 ```sh
 gh workflow run docs.yml --repo typescope/jtest --ref main
 ```
+
+Wait for that run with the same commands above. Before announcing the docs,
+open `https://typescope.github.io/jtest/` in a browser and confirm it redirects
+to `/$VERSION/`. Check the versioned page, an API symbol link, and an earlier
+version's URL. Verify the published doc files respond successfully:
+
+```sh
+curl --fail --silent --show-error --output /dev/null \
+  "https://typescope.github.io/jtest/$VERSION/index.html"
+curl --fail --silent --show-error --output /dev/null \
+  "https://typescope.github.io/jtest/$VERSION/data.js"
+```
+
+Website publication is complete once the Pages deployment and these live
+checks pass.
 
 For a local preview, run:
 

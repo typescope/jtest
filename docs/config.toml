@@ -1,9 +1,0 @@
-base_url = "https://typescope.github.io/jtest"
-title = "jtest"
-description = "A testing framework for Jo, with a shared API and Python and Ruby runners."
-compile_sass = false
-build_search_index = false
-generate_feeds = false
-
-[extra]
-github = "https://github.com/typescope/jtest"

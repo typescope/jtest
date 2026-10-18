@@ -32,7 +32,6 @@ class DocsTests(unittest.TestCase):
         self.readme = self.root / "README.md"
         (self.root / "docs").mkdir()
         self.readme.write_text("# jtest\n\nRelease introduction.\n")
-        (self.root / "CHANGELOG.md").write_text("# Changelog\n\n## [0.10.0]\n\n### Fixed\n\n- A fix.\n")
         versions = ["0.2.0", "0.10.0"]
         (self.root / "docs/api-versions.jsonl").write_text(
             "".join(json.dumps({"version": version}) + "\n" for version in versions)
@@ -62,17 +61,20 @@ class DocsTests(unittest.TestCase):
 
     def test_latest_is_semantic_and_old_versions_remain_accessible(self):
         site.prepare_site(self.root, self.assets.as_uri())
-        metadata = json.loads((self.root / "docs/api-docs.json").read_text())
-        self.assertEqual(metadata, {"version": "0.10.0", "path": "api/latest/"})
-        base = self.root / "docs/static/api"
+        base = self.root / "docs/public"
         self.assertTrue((base / "0.2.0/index.html").is_file())
         self.assertTrue((base / "0.10.0/index.html").is_file())
-        self.assertIn("../0.10.0/", (base / "latest/index.html").read_text())
-        self.assertIn("location.hash", (base / "latest/index.html").read_text())
-        self.assertIn("## Changelog", (self.root / "docs/changelog.md").read_text())
+        redirect = (base / "index.html").read_text()
+        self.assertIn('content="0;url=0.10.0/"', redirect)
+        self.assertIn('href="0.10.0/"', redirect)
+        self.assertIn("location.search + location.hash", redirect)
+        self.assertEqual(
+            {path.name for path in base.iterdir()},
+            {"0.2.0", "0.10.0", "index.html", ".nojekyll"},
+        )
 
     def test_corrupt_download_preserves_existing_site(self):
-        destination = self.root / "docs/static/api"
+        destination = self.root / "docs/public"
         destination.mkdir(parents=True)
         (destination / "existing.html").write_text("published docs")
         archive = self.assets / "v0.2.0/jtest-docs-v0.2.0.zip"

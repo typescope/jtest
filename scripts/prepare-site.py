@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download released API docs and prepare the changelog for the Zola site."""
+"""Build GitHub Pages from released API docs, redirecting the root to the latest."""
 
 import argparse
 import hashlib
@@ -58,28 +58,25 @@ def prepare_site(root, asset_base=ASSET_BASE):
             if not checksum or hashlib.sha512(archive).hexdigest() != checksum[0]:
                 raise ValueError(f"checksum mismatch: {url}")
             unpack_docs(archive, staging, version)
-            print(f"jtest {version}: /api/{version}/")
+            print(f"jtest {version}: /{version}/")
 
-        target = f"../{latest}/"
-        alias = staging / "latest"
-        alias.mkdir()
-        (alias / "index.html").write_text(
-            '<!doctype html><html lang="en"><meta charset="utf-8">'
-            '<title>jtest API</title>'
-            f'<meta http-equiv="refresh" content="0;url={target}">'
-            f'<script>location.replace("{target}" + location.search + location.hash)</script>'
-            f'<a href="{target}">Read jtest {latest} API documentation</a></html>\n'
+        target = f"{latest}/"
+        (staging / "index.html").write_text(
+            '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+            '<title>jtest API</title>\n'
+            f'<meta http-equiv="refresh" content="0;url={target}">\n'
+            f'<script>location.replace("{target}" + location.search + location.hash)</script>\n'
+            '</head>\n<body>\n'
+            f'<a href="{target}">Read jtest {latest} API documentation</a>\n'
+            '</body>\n</html>\n'
         )
+        (staging / ".nojekyll").touch()
 
-        destination = docs / "static" / "api"
+        destination = docs / "public"
         if destination.exists():
             shutil.rmtree(destination)
         shutil.copytree(staging, destination)
-
-    (docs / "api-docs.json").write_text(json.dumps({"version": latest, "path": "api/latest/"}) + "\n")
-    # Nest the changelog headings below the page's single h1.
-    changelog = re.sub(r"(?m)^(#{1,5}) ", r"#\1 ", (root / "CHANGELOG.md").read_text())
-    (docs / "changelog.md").write_text(changelog)
 
 
 if __name__ == "__main__":

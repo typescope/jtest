@@ -72,14 +72,14 @@ After uploading the API assets, append `{"version": "VERSION"}` to
 and verifies the archives for every listed version on every build. Only append
 a version once its unified API archive and checksum are available in the release.
 
-The site links to the latest unified API documentation. Documentation URLs are:
+The site root redirects to the latest listed version. Documentation URLs are:
 
-- `https://typescope.github.io/jtest/api/latest/`
-- `https://typescope.github.io/jtest/api/<version>/`
+- `https://typescope.github.io/jtest/` → `https://typescope.github.io/jtest/0.2.0/`
+- `https://typescope.github.io/jtest/<version>/`
 
-The latest alias preserves API symbol links, and previous version paths remain
-accessible when a new release is added. The changelog is rendered directly from
-the repository's `CHANGELOG.md`.
+The redirect preserves query strings and API symbol links. Previous version
+paths remain accessible when a new release is added. The README in each API
+archive is that version's home page.
 
 Set the repository's Pages source to **GitHub Actions** once. The `Docs` workflow
 checks PRs and deploys site changes merged to `main`. To republish manually:
@@ -88,12 +88,13 @@ checks PRs and deploys site changes merged to `main`. To republish manually:
 gh workflow run docs.yml --repo typescope/jtest --ref main
 ```
 
-For a local preview, install Zola 0.22.1, then run:
+For a local preview, run:
 
 ```sh
 python3 scripts/test-docs.py
 python3 scripts/prepare-site.py
-zola --root docs serve
+python3 -m http.server 8000 --directory docs/public
 ```
 
-`prepare-site.py` regenerates ignored site data and the downloaded API tree.
+`prepare-site.py` builds the ignored `docs/public/` directory using Python's
+standard library. It contains the root redirect and a directory for each version.

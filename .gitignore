@@ -4,3 +4,4 @@ jo.lock
 __pycache__/
 *.jo-before.txt
 *.jo-after.txt
+docs/public/

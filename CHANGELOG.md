@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- Versioned API documentation at `jtest.jo-lang.org`, combining assertions, suites,
+  and both runners. The site root redirects to the latest release; earlier
+  versions remain available at their versioned URLs.
+- Release API documentation archives with the README as their introduction.
+
 ### Fixed
 
 - `Runner.runWithArgs` uses normal process exit with status 1 after reporting

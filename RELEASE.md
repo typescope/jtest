@@ -89,30 +89,36 @@ the site; the deployment runs after merge.
 
 The site root redirects to the latest listed version. Documentation URLs are:
 
-- `https://typescope.github.io/jtest/` → `https://typescope.github.io/jtest/0.2.0/`
-- `https://typescope.github.io/jtest/<version>/`
+- `https://jtest.jo-lang.org/` → `https://jtest.jo-lang.org/0.2.0/`
+- `https://jtest.jo-lang.org/<version>/`
 
 The redirect preserves query strings and API symbol links. Previous version
 paths remain accessible when a new release is added. The README in each API
 archive is that version's home page.
 
-Set the repository's Pages source to **GitHub Actions** once. The `Docs` workflow
-checks PRs and deploys site changes merged to `main`. To republish manually:
+Set the repository's Pages source to **GitHub Actions** and its custom domain
+to **jtest.jo-lang.org** once. Configure DNS with a `CNAME` from
+`jtest.jo-lang.org` to `typescope.github.io`, and enable **Enforce HTTPS** once
+GitHub has issued the certificate. The custom domain is a repository Pages
+setting for the Actions publishing workflow.
+
+The `Docs` workflow checks PRs and deploys site changes merged to `main`.
+To republish manually:
 
 ```sh
 gh workflow run docs.yml --repo typescope/jtest --ref main
 ```
 
 Wait for that run with the same commands above. Before announcing the docs,
-open `https://typescope.github.io/jtest/` in a browser and confirm it redirects
+open `https://jtest.jo-lang.org/` in a browser and confirm it redirects
 to `/$VERSION/`. Check the versioned page, an API symbol link, and an earlier
 version's URL. Verify the published doc files respond successfully:
 
 ```sh
 curl --fail --silent --show-error --output /dev/null \
-  "https://typescope.github.io/jtest/$VERSION/index.html"
+  "https://jtest.jo-lang.org/$VERSION/index.html"
 curl --fail --silent --show-error --output /dev/null \
-  "https://typescope.github.io/jtest/$VERSION/data.js"
+  "https://jtest.jo-lang.org/$VERSION/data.js"
 ```
 
 Website publication is complete once the Pages deployment and these live

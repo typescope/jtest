@@ -2,20 +2,10 @@
 
 <!-- Describe the problem and the resulting behavior. Link related issues. -->
 
-## Tests
+## Check list
 
-<!-- Check completed commands and explain any skipped checks. Package builds are required for package changes. -->
-
-- [ ] `jo run test-python`
-- [ ] `jo run test-ruby`
-- [ ] `python3 scripts/check-output.py`
-- [ ] `jo package core`
-- [ ] `jo package python`
-- [ ] `jo package ruby`
-
-## Changelog
-
-- [ ] Update `CHANGELOG.md`.
+- [ ] Add tests
+- [ ] Update `CHANGELOG.md`
 
 ## Compatibility
 

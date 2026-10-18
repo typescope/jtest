@@ -160,12 +160,12 @@ section Runner
 
   //[ Run tests using the conventional first-argument filter.
     !
-    ! Aborts with a non-zero process status when any selected test fails. Use
+    ! Exits with process status 1 when any selected test fails. Use
     ! `run` when the caller needs to handle the Boolean result itself.
   //]
   def runWithArgs(root: Testing.Suite): Unit receives stdout, args =
     if !run(root, filterFromArgs(args)) then
-      abort("tests failed")
+      hostExit(1)
 
   // The root contributes no path segment, so a filter reads as `providers/openai`.
   private def walk(
